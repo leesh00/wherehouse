@@ -31,8 +31,8 @@ function NewItem() {
           }}
           submitLabel="등록"
           onSubmit={async (input) => {
-            await addItem(input);
-            router.replace(backHref);
+            const saved = await addItem(input);
+            router.replace(`/list/?loc=${saved.locationId}`);
           }}
         />
       ) : (
