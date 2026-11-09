@@ -4,8 +4,33 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Header from "@/components/Header";
+import { getExpiryLabel, type ExpiryLabel } from "@/core/expiry";
 import { getItemsInLocation, getLocationPath } from "@/core/location";
 import { useInventory, useLoadInventory } from "@/hooks/useInventory";
+
+// 색과 함께 문구로도 상태를 구분한다
+const badgeStyle: Record<ExpiryLabel["kind"], string> = {
+  expired: "rounded bg-red-100 px-1.5 font-semibold text-red-800",
+  today: "rounded bg-amber-100 px-1.5 font-semibold text-amber-900",
+  soon: "rounded bg-amber-100 px-1.5 font-semibold text-amber-900",
+  later: "text-zinc-500",
+};
+
+function ExpiryBadge({
+  expiresAt,
+  today,
+}: {
+  expiresAt?: string;
+  today: string;
+}) {
+  const label = getExpiryLabel(expiresAt, today);
+  if (!label) return null;
+  return (
+    <span className={`shrink-0 text-xs ${badgeStyle[label.kind]}`}>
+      {label.text}
+    </span>
+  );
+}
 
 function ItemList() {
   const loc = useSearchParams().get("loc") ?? "";
@@ -14,6 +39,7 @@ function ItemList() {
   const allItems = useInventory((s) => s.items);
   const items = getItemsInLocation(allItems, locations, loc);
   const exists = locations.some((l) => l.id === loc);
+  const today = new Date().toLocaleDateString("sv-SE"); // 로컬 YYYY-MM-DD
 
   return (
     <>
@@ -48,7 +74,10 @@ function ItemList() {
                 className="flex min-h-14 items-center gap-3 px-4 py-3"
               >
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium">{item.name}</p>
+                  <p className="flex items-center gap-2">
+                    <span className="truncate font-medium">{item.name}</span>
+                    <ExpiryBadge expiresAt={item.expiresAt} today={today} />
+                  </p>
                   <p className="truncate text-sm text-zinc-600">
                     {[
                       item.locationId !== loc &&
