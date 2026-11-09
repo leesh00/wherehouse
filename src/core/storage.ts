@@ -8,6 +8,7 @@ export interface StorageAdapter {
   getItem(id: string): Promise<Item | undefined>;
   addItem(input: ItemInput): Promise<Item>;
   updateItem(id: string, patch: Partial<ItemInput>): Promise<Item>;
+  deleteItem(id: string): Promise<void>;
 }
 
 interface WhereHouseDB extends DBSchema {
@@ -58,6 +59,9 @@ export function createIdbAdapter(dbName = "wherehouse"): StorageAdapter {
       await tx.store.put(item);
       await tx.done;
       return item;
+    },
+    async deleteItem(id) {
+      await (await db).delete("items", id);
     },
   };
 }

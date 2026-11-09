@@ -16,6 +16,7 @@ interface InventoryState {
   load: () => Promise<void>;
   addItem: (input: ItemInput) => Promise<Item>;
   updateItem: (id: string, patch: Partial<ItemInput>) => Promise<Item>;
+  deleteItem: (id: string) => Promise<void>;
 }
 
 export const useInventory = create<InventoryState>()((set, get) => ({
@@ -40,6 +41,10 @@ export const useInventory = create<InventoryState>()((set, get) => ({
     const item = await db().updateItem(id, patch);
     set({ items: get().items.map((i) => (i.id === id ? item : i)) });
     return item;
+  },
+  async deleteItem(id) {
+    await db().deleteItem(id);
+    set({ items: get().items.filter((i) => i.id !== id) });
   },
 }));
 

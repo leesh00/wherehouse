@@ -68,6 +68,18 @@ describe("IndexedDB 저장소 어댑터", () => {
     expect(await db.getItem(saved.id)).toEqual(updated);
   });
 
+  it("삭제한 재고는 조회되지 않고, 새로 열어도 남지 않는다", async () => {
+    const name = `test-${n++}`;
+    const db = createIdbAdapter(name);
+    const keep = await db.addItem(input);
+    const gone = await db.addItem({ ...input, name: "치약" });
+
+    await db.deleteItem(gone.id);
+
+    expect(await db.getItem(gone.id)).toBeUndefined();
+    expect(await createIdbAdapter(name).getItems()).toEqual([keep]);
+  });
+
   it("없는 재고를 수정하면 에러가 난다", async () => {
     await expect(
       freshAdapter().updateItem("none", { quantity: 1 }),
