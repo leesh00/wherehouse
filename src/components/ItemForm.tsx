@@ -1,11 +1,14 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import { findDuplicates } from "@/core/duplicate";
 import { getLocationPath } from "@/core/location";
-import type { ItemInput, Location } from "@/core/types";
+import type { Item, ItemInput, Location } from "@/core/types";
 
 interface Props {
   locations: Location[];
+  others: Item[]; // 중복 검사 대상 (수정 중인 재고 자신은 제외)
   initial: ItemInput;
   submitLabel: string;
   onSubmit: (input: ItemInput) => Promise<void>;
@@ -21,6 +24,7 @@ const input =
 
 export default function ItemForm({
   locations,
+  others,
   initial,
   submitLabel,
   onSubmit,
@@ -33,6 +37,20 @@ export default function ItemForm({
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  // 경고를 보여준 시점의 이름. 이름이 바뀌면 경고가 다시 필요하다
+  const [warnedFor, setWarnedFor] = useState<string | null>(null);
+
+  // 수정 화면에서 이름을 그대로 두면 검사하지 않는다 (이름을 바꿀 때만 경고)
+  const nameUnchanged =
+    form.name.trim().toLowerCase() === initial.name.trim().toLowerCase();
+  const duplicates = nameUnchanged ? [] : findDuplicates(others, form.name);
+  const duplicateSummary = duplicates
+    .map(
+      (d) =>
+        `${getLocationPath(locations, d.locationId)} ${d.quantity}${d.unit}`,
+    )
+    .join(", ");
+  const showWarning = duplicates.length > 0 && warnedFor === form.name;
 
   const set =
     (key: keyof typeof form) =>
@@ -49,6 +67,10 @@ export default function ItemForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (duplicates.length > 0 && warnedFor !== form.name) {
+      setWarnedFor(form.name);
+      return;
+    }
     setSaving(true);
     setError("");
     try {
@@ -78,7 +100,13 @@ export default function ItemForm({
           onChange={set("name")}
           required
           autoFocus
+          aria-describedby={duplicates.length ? "duplicate-hint" : undefined}
         />
+        {duplicates.length > 0 && (
+          <span id="duplicate-hint" className="text-sm text-amber-900">
+            ⚠ 같은 이름의 재고가 있습니다: {duplicateSummary}
+          </span>
+        )}
       </label>
       <label className={field}>
         위치 *
@@ -161,13 +189,39 @@ export default function ItemForm({
           ⚠ {error}
         </p>
       )}
-      <button
-        type="submit"
-        disabled={saving}
-        className="min-h-11 rounded-lg bg-zinc-900 font-semibold text-white disabled:opacity-50"
-      >
-        {saving ? "저장 중…" : submitLabel}
-      </button>
+      {showWarning ? (
+        <div
+          role="alert"
+          className="flex flex-col gap-3 rounded-lg border border-amber-400 bg-amber-50 p-3"
+        >
+          <p className="text-amber-900">
+            ⚠ 같은 이름의 재고가 이미 있습니다: {duplicateSummary}
+          </p>
+          <div className="flex gap-2">
+            <Link
+              href={`/?q=${encodeURIComponent(form.name.trim())}`}
+              className="flex min-h-11 flex-1 items-center justify-center rounded-lg border border-zinc-300 bg-white font-semibold"
+            >
+              기존 재고 보기
+            </Link>
+            <button
+              type="submit"
+              disabled={saving}
+              className="min-h-11 flex-1 rounded-lg bg-zinc-900 font-semibold text-white disabled:opacity-50"
+            >
+              {saving ? "저장 중…" : `그래도 ${submitLabel}`}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button
+          type="submit"
+          disabled={saving}
+          className="min-h-11 rounded-lg bg-zinc-900 font-semibold text-white disabled:opacity-50"
+        >
+          {saving ? "저장 중…" : submitLabel}
+        </button>
+      )}
     </form>
   );
 }

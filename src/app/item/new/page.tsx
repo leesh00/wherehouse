@@ -11,6 +11,7 @@ function NewItem() {
   const loc = useSearchParams().get("loc") ?? "";
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
+  const items = useInventory((s) => s.items);
   const addItem = useInventory((s) => s.addItem);
   const backHref = loc ? `/list/?loc=${loc}` : "/";
 
@@ -20,6 +21,7 @@ function NewItem() {
       {loaded ? (
         <ItemForm
           locations={locations}
+          others={items}
           initial={{
             name: "",
             category: "",

@@ -15,7 +15,8 @@ function EditItem() {
   const searchHref = q ? `/?q=${encodeURIComponent(q)}` : null;
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
-  const item = useInventory((s) => s.items.find((i) => i.id === id));
+  const items = useInventory((s) => s.items);
+  const item = items.find((i) => i.id === id);
   const updateItem = useInventory((s) => s.updateItem);
   const deleteItem = useInventory((s) => s.deleteItem);
   // 삭제 후 이동 전까지 "찾을 수 없음"이 잠깐 보이지 않게
@@ -51,6 +52,7 @@ function EditItem() {
           <ItemForm
             key={item.id}
             locations={locations}
+            others={items.filter((i) => i.id !== item.id)}
             initial={item}
             submitLabel="저장"
             onSubmit={async (input) => {
