@@ -8,7 +8,11 @@ import { useInventory, useLoadInventory } from "@/hooks/useInventory";
 
 function EditItem() {
   const router = useRouter();
-  const id = useSearchParams().get("id");
+  const params = useSearchParams();
+  const id = params.get("id");
+  // 검색 결과에서 왔으면(&q=) 저장·삭제·뒤로 모두 검색 결과로 돌아간다
+  const q = params.get("q");
+  const searchHref = q ? `/?q=${encodeURIComponent(q)}` : null;
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
   const item = useInventory((s) => s.items.find((i) => i.id === id));
@@ -16,13 +20,13 @@ function EditItem() {
   const deleteItem = useInventory((s) => s.deleteItem);
   // 삭제 후 이동 전까지 "찾을 수 없음"이 잠깐 보이지 않게
   const [deletedTo, setDeletedTo] = useState<string | null>(null);
-  const backHref = item ? `/list/?loc=${item.locationId}` : "/";
+  const backHref = searchHref ?? (item ? `/list/?loc=${item.locationId}` : "/");
 
   async function handleDelete() {
     if (!item) return;
     if (!confirm(`'${item.name}'을(를) 삭제할까요? 되돌릴 수 없습니다.`))
       return;
-    const to = `/list/?loc=${item.locationId}`;
+    const to = searchHref ?? `/list/?loc=${item.locationId}`;
     try {
       setDeletedTo(to);
       await deleteItem(item.id);
@@ -51,7 +55,7 @@ function EditItem() {
             submitLabel="저장"
             onSubmit={async (input) => {
               const saved = await updateItem(item.id, input);
-              router.replace(`/list/?loc=${saved.locationId}`);
+              router.replace(searchHref ?? `/list/?loc=${saved.locationId}`);
             }}
           />
           <div className="px-4 pb-8">
