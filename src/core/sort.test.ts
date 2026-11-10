@@ -27,7 +27,7 @@ describe("sortItems", () => {
     ]);
   });
 
-  it("유통기한 임박순: 빠른 날짜 먼저, 같으면 이름순, 없으면 맨 뒤", () => {
+  it("유통기한순: 빠른 날짜 먼저, 같으면 이름순, 없으면 맨 뒤", () => {
     expect(names(sortItems(items, "expiry"))).toEqual(["라", "가", "다", "나"]);
   });
 

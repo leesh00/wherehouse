@@ -2,7 +2,7 @@ import type { Item } from "./types";
 
 export const SORT_OPTIONS = [
   { value: "created", label: "등록순" },
-  { value: "expiry", label: "유통기한 임박순" },
+  { value: "expiry", label: "유통기한순" },
   { value: "quantity", label: "수량 적은순" },
 ] as const;
 
