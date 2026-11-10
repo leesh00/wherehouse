@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import { getExpiryLabel, type ExpiryLabel } from "@/core/expiry";
 import { getItemsInLocation, getLocationPath } from "@/core/location";
+import { SORT_OPTIONS, sortItems, toSortKey } from "@/core/sort";
 import { useInventory, useLoadInventory } from "@/hooks/useInventory";
 
 // 색과 함께 문구로도 상태를 구분한다
@@ -33,11 +34,14 @@ function ExpiryBadge({
 }
 
 function ItemList() {
-  const loc = useSearchParams().get("loc") ?? "";
+  const router = useRouter();
+  const params = useSearchParams();
+  const loc = params.get("loc") ?? "";
+  const sort = toSortKey(params.get("sort"));
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
   const allItems = useInventory((s) => s.items);
-  const items = getItemsInLocation(allItems, locations, loc);
+  const items = sortItems(getItemsInLocation(allItems, locations, loc), sort);
   const exists = locations.some((l) => l.id === loc);
   const today = new Date().toLocaleDateString("sv-SE"); // 로컬 YYYY-MM-DD
 
@@ -66,36 +70,60 @@ function ItemList() {
           등록된 재고가 없습니다. 오른쪽 위 &lsquo;+ 등록&rsquo;으로 추가하세요.
         </p>
       ) : (
-        <ul className="divide-y divide-zinc-200">
-          {items.map((item) => (
-            <li key={item.id}>
-              <Link
-                href={`/item/edit/?id=${item.id}`}
-                className="flex min-h-14 items-center gap-3 px-4 py-3"
+        <>
+          <div className="flex justify-end border-b border-zinc-200 px-4 py-2">
+            <label className="flex items-center gap-2 text-sm">
+              정렬
+              <select
+                className="min-h-11 rounded-lg border border-zinc-300 px-2 text-base"
+                value={sort}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  // 뒤로가기가 정렬 변경마다 쌓이지 않게 replace
+                  router.replace(
+                    `/list/?loc=${loc}${v === "created" ? "" : `&sort=${v}`}`,
+                  );
+                }}
               >
-                <div className="min-w-0 flex-1">
-                  <p className="flex items-center gap-2">
-                    <span className="truncate font-medium">{item.name}</span>
-                    <ExpiryBadge expiresAt={item.expiresAt} today={today} />
-                  </p>
-                  <p className="truncate text-sm text-zinc-600">
-                    {[
-                      item.locationId !== loc &&
-                        getLocationPath(locations, item.locationId),
-                      item.category,
-                    ]
-                      .filter(Boolean)
-                      .join(" · ")}
-                  </p>
-                </div>
-                <span className="shrink-0 font-semibold">
-                  {item.quantity}
-                  {item.unit}
-                </span>
-              </Link>
-            </li>
-          ))}
-        </ul>
+                {SORT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <ul className="divide-y divide-zinc-200">
+            {items.map((item) => (
+              <li key={item.id}>
+                <Link
+                  href={`/item/edit/?id=${item.id}`}
+                  className="flex min-h-14 items-center gap-3 px-4 py-3"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-2">
+                      <span className="truncate font-medium">{item.name}</span>
+                      <ExpiryBadge expiresAt={item.expiresAt} today={today} />
+                    </p>
+                    <p className="truncate text-sm text-zinc-600">
+                      {[
+                        item.locationId !== loc &&
+                          getLocationPath(locations, item.locationId),
+                        item.category,
+                      ]
+                        .filter(Boolean)
+                        .join(" · ")}
+                    </p>
+                  </div>
+                  <span className="shrink-0 font-semibold">
+                    {item.quantity}
+                    {item.unit}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
     </>
   );
