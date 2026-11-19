@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   DEFAULT_LOCATIONS,
+  createLocation,
+  flattenTree,
+  getDeleteBlockers,
+  getRootId,
+  moveLocation,
   getDescendantIds,
   getItemsInLocation,
   getLocationPath,
@@ -42,5 +47,84 @@ describe("위치 계산", () => {
     expect(
       getItemsInLocation(items, locations, "kitchen").map((i) => i.id),
     ).toEqual(["k"]);
+  });
+});
+
+describe("위치 편집", () => {
+  const tree = [
+    ...locations,
+    { id: "desk", name: "책상", parentId: "room", depth: 1, order: 1 },
+  ];
+  const ids = (list: Location[]) => list.map((l) => l.id);
+
+  it("flattenTree는 부모 → 자식, order 순으로 펼친다", () => {
+    expect(ids(flattenTree(tree))).toEqual([
+      "room",
+      "drawer1",
+      "slot2",
+      "desk",
+      "kitchen",
+      "bathroom",
+    ]);
+    expect(ids(flattenTree(tree, "room"))).toEqual([
+      "drawer1",
+      "slot2",
+      "desk",
+    ]);
+  });
+
+  it("getRootId는 최상위 조상을 찾는다", () => {
+    expect(getRootId(tree, "slot2")).toBe("room");
+    expect(getRootId(tree, "kitchen")).toBe("kitchen");
+  });
+
+  it("createLocation은 부모 depth+1, 같은 부모의 맨 뒤 order로 만든다", () => {
+    const top = createLocation(tree, " 베란다 ", null);
+    expect(top).toMatchObject({
+      name: "베란다",
+      parentId: null,
+      depth: 0,
+      order: 3,
+    });
+    expect(createLocation(tree, "선반", "kitchen")).toMatchObject({
+      depth: 1,
+      order: 0,
+    });
+    expect(createLocation(tree, "칸", "drawer1")).toMatchObject({
+      depth: 2,
+      order: 1,
+    });
+  });
+
+  it("depth 2 아래에는 만들 수 없다", () => {
+    expect(() => createLocation(tree, "더 아래", "slot2")).toThrow();
+  });
+
+  it("moveLocation은 같은 부모 안의 이웃과 order를 바꾼다", () => {
+    expect(moveLocation(tree, "kitchen", -1)).toEqual([
+      { ...DEFAULT_LOCATIONS[1], order: 0 },
+      { ...DEFAULT_LOCATIONS[0], order: 1 },
+    ]);
+    expect(moveLocation(tree, "desk", -1).map((l) => [l.id, l.order])).toEqual([
+      ["desk", 0],
+      ["drawer1", 1],
+    ]);
+  });
+
+  it("맨 앞에서 위로, 맨 뒤에서 아래로는 움직이지 않는다", () => {
+    expect(moveLocation(tree, "room", -1)).toEqual([]);
+    expect(moveLocation(tree, "bathroom", 1)).toEqual([]);
+  });
+
+  it("getDeleteBlockers는 직속 하위 위치와 그 위치의 재고 수를 센다", () => {
+    const items = [item("a", "room", "x"), item("b", "slot2", "x")];
+    expect(getDeleteBlockers(tree, items, "room")).toEqual({
+      children: 2,
+      items: 1,
+    });
+    expect(getDeleteBlockers(tree, items, "kitchen")).toEqual({
+      children: 0,
+      items: 0,
+    });
   });
 });

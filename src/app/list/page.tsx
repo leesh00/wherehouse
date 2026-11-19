@@ -5,7 +5,12 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import Header from "@/components/Header";
 import ItemRow from "@/components/ItemRow";
-import { getItemsInLocation, getLocationPath } from "@/core/location";
+import {
+  flattenTree,
+  getItemsInLocation,
+  getLocationPath,
+  getRootId,
+} from "@/core/location";
 import { SORT_OPTIONS, sortItems, toSortKey } from "@/core/sort";
 import { useInventory, useLoadInventory } from "@/hooks/useInventory";
 
@@ -20,6 +25,21 @@ function ItemList() {
   const items = sortItems(getItemsInLocation(allItems, locations, loc), sort);
   const exists = locations.some((l) => l.id === loc);
   const today = new Date().toLocaleDateString("sv-SE"); // 로컬 YYYY-MM-DD
+  const sortQuery = sort === "created" ? "" : `&sort=${sort}`;
+
+  // 하위 위치 칩: 이 위치가 속한 방의 [전체] + 모든 하위 위치. 누르면 loc가 바뀐다
+  const rootId = getRootId(locations, loc);
+  const rootPath = getLocationPath(locations, rootId);
+  const chips = exists
+    ? [
+        { id: rootId, label: "전체" },
+        ...flattenTree(locations, rootId).map((l) => ({
+          id: l.id,
+          // "방 > 1번 서랍장 > 2칸" → "1번 서랍장 > 2칸"
+          label: getLocationPath(locations, l.id).slice(rootPath.length + 3),
+        })),
+      ]
+    : [];
 
   return (
     <>
@@ -37,6 +57,32 @@ function ItemList() {
           )
         }
       />
+      {chips.length > 1 && (
+        <nav
+          aria-label="하위 위치"
+          className="flex gap-2 overflow-x-auto border-b border-zinc-200 px-4 py-2"
+        >
+          {chips.map((c) => {
+            const selected = c.id === loc;
+            return (
+              <Link
+                key={c.id}
+                replace
+                href={`/list/?loc=${c.id}${sortQuery}`}
+                aria-current={selected ? "page" : undefined}
+                className={`flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm ${
+                  selected
+                    ? "border-zinc-900 bg-zinc-900 font-semibold text-white"
+                    : "border-zinc-300"
+                }`}
+              >
+                {selected && "✓ "}
+                {c.label}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
       {!loaded ? (
         <p className="p-4">불러오는 중…</p>
       ) : !exists ? (

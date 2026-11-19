@@ -9,6 +9,9 @@ export interface StorageAdapter {
   addItem(input: ItemInput): Promise<Item>;
   updateItem(id: string, patch: Partial<ItemInput>): Promise<Item>;
   deleteItem(id: string): Promise<void>;
+  /** 추가·수정 모두. 여러 개를 한 트랜잭션으로 (순서 바꾸기는 두 개가 함께 바뀜) */
+  putLocations(locations: Location[]): Promise<void>;
+  deleteLocation(id: string): Promise<void>;
 }
 
 interface WhereHouseDB extends DBSchema {
@@ -62,6 +65,13 @@ export function createIdbAdapter(dbName = "wherehouse"): StorageAdapter {
     },
     async deleteItem(id) {
       await (await db).delete("items", id);
+    },
+    async putLocations(locations) {
+      const tx = (await db).transaction("locations", "readwrite");
+      await Promise.all([...locations.map((l) => tx.store.put(l)), tx.done]);
+    },
+    async deleteLocation(id) {
+      await (await db).delete("locations", id);
     },
   };
 }

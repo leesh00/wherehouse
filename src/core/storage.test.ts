@@ -80,6 +80,29 @@ describe("IndexedDB 저장소 어댑터", () => {
     expect(await createIdbAdapter(name).getItems()).toEqual([keep]);
   });
 
+  it("위치를 추가·수정·삭제하면 새로 열어도 반영돼 있다", async () => {
+    const name = `test-${n++}`;
+    const db = createIdbAdapter(name);
+    const shelf = {
+      id: "shelf",
+      name: "선반",
+      parentId: "kitchen",
+      depth: 1,
+      order: 0,
+    };
+    await db.putLocations([shelf]);
+    await db.putLocations([
+      { ...shelf, name: "찬장" },
+      { id: "room", name: "안방", parentId: null, depth: 0, order: 0 },
+    ]);
+    await db.deleteLocation("bathroom");
+
+    const names = (await createIdbAdapter(name).getLocations())
+      .map((l) => l.name)
+      .sort();
+    expect(names).toEqual(["부엌", "안방", "찬장"].sort());
+  });
+
   it("없는 재고를 수정하면 에러가 난다", async () => {
     await expect(
       freshAdapter().updateItem("none", { quantity: 1 }),

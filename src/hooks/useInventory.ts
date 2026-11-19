@@ -2,6 +2,11 @@
 
 import { useEffect } from "react";
 import { create } from "zustand";
+import {
+  createLocation,
+  getDeleteBlockers,
+  moveLocation as getMovedLocations,
+} from "@/core/location";
 import { createIdbAdapter, type StorageAdapter } from "@/core/storage";
 import type { Item, ItemInput, Location } from "@/core/types";
 
@@ -17,7 +22,17 @@ interface InventoryState {
   addItem: (input: ItemInput) => Promise<Item>;
   updateItem: (id: string, patch: Partial<ItemInput>) => Promise<Item>;
   deleteItem: (id: string) => Promise<void>;
+  addLocation: (name: string, parentId: string | null) => Promise<void>;
+  renameLocation: (id: string, name: string) => Promise<void>;
+  moveLocation: (id: string, dir: -1 | 1) => Promise<void>;
+  deleteLocation: (id: string) => Promise<void>;
 }
+
+// 바뀐 위치들을 id 기준으로 덮어쓴다 (없던 id는 추가)
+const mergeLocations = (all: Location[], changed: Location[]) => [
+  ...all.filter((l) => !changed.some((c) => c.id === l.id)),
+  ...changed,
+];
 
 export const useInventory = create<InventoryState>()((set, get) => ({
   loaded: false,
@@ -45,6 +60,36 @@ export const useInventory = create<InventoryState>()((set, get) => ({
   async deleteItem(id) {
     await db().deleteItem(id);
     set({ items: get().items.filter((i) => i.id !== id) });
+  },
+  async addLocation(name, parentId) {
+    const loc = createLocation(get().locations, name, parentId);
+    await db().putLocations([loc]);
+    set({ locations: mergeLocations(get().locations, [loc]) });
+  },
+  async renameLocation(id, name) {
+    const loc = get().locations.find((l) => l.id === id);
+    if (!loc) return;
+    const renamed = { ...loc, name: name.trim() };
+    await db().putLocations([renamed]);
+    set({ locations: mergeLocations(get().locations, [renamed]) });
+  },
+  async moveLocation(id, dir) {
+    const changed = getMovedLocations(get().locations, id, dir);
+    if (!changed.length) return;
+    await db().putLocations(changed);
+    set({ locations: mergeLocations(get().locations, changed) });
+  },
+  async deleteLocation(id) {
+    // 화면에서 막더라도 저장 직전에 한 번 더 확인 (하위 위치·재고가 고아가 되지 않게)
+    const { children, items } = getDeleteBlockers(
+      get().locations,
+      get().items,
+      id,
+    );
+    if (children || items)
+      throw new Error("하위 위치나 재고가 있는 위치는 삭제할 수 없습니다");
+    await db().deleteLocation(id);
+    set({ locations: get().locations.filter((l) => l.id !== id) });
   },
 }));
 

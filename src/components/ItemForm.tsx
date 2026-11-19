@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { findDuplicates } from "@/core/duplicate";
-import { getLocationPath } from "@/core/location";
+import { flattenTree, getLocationPath } from "@/core/location";
 import type { Item, ItemInput, Location } from "@/core/types";
 
 interface Props {
@@ -61,9 +61,11 @@ export default function ItemForm({
     ) =>
       setForm({ ...form, [key]: e.target.value });
 
-  const options = locations
-    .map((l) => ({ id: l.id, path: getLocationPath(locations, l.id) }))
-    .sort((a, b) => a.path.localeCompare(b.path));
+  // 위치 관리에서 정한 순서(트리 순서)대로
+  const options = flattenTree(locations).map((l) => ({
+    id: l.id,
+    path: getLocationPath(locations, l.id),
+  }));
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

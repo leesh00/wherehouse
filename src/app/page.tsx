@@ -31,7 +31,17 @@ function Home() {
 
   return (
     <>
-      <Header title="WhereHouse" />
+      <Header
+        title="WhereHouse"
+        action={
+          <Link
+            href="/settings/"
+            className="flex min-h-11 items-center rounded-lg px-3 font-semibold"
+          >
+            설정
+          </Link>
+        }
+      />
       <div className="px-4 pt-4">
         <input
           type="search"
