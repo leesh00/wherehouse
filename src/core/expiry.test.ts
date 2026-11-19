@@ -13,7 +13,7 @@ describe("getExpiryLabel", () => {
   it("지난 날짜는 며칠 지났는지 표시", () => {
     expect(label("2026-11-08")).toEqual({
       kind: "expired",
-      text: "기한 지남 2일",
+      text: "2일 지남",
     });
   });
 
