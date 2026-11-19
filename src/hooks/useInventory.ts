@@ -26,6 +26,7 @@ interface InventoryState {
   renameLocation: (id: string, name: string) => Promise<void>;
   moveLocation: (id: string, dir: -1 | 1) => Promise<void>;
   deleteLocation: (id: string) => Promise<void>;
+  importData: (locations: Location[], items: Item[]) => Promise<void>;
 }
 
 // 바뀐 위치들을 id 기준으로 덮어쓴다 (없던 id는 추가)
@@ -90,6 +91,10 @@ export const useInventory = create<InventoryState>()((set, get) => ({
       throw new Error("하위 위치나 재고가 있는 위치는 삭제할 수 없습니다");
     await db().deleteLocation(id);
     set({ locations: get().locations.filter((l) => l.id !== id) });
+  },
+  async importData(locations, items) {
+    await db().replaceAll(locations, items);
+    set({ locations, items });
   },
 }));
 

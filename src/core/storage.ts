@@ -12,6 +12,8 @@ export interface StorageAdapter {
   /** 추가·수정 모두. 여러 개를 한 트랜잭션으로 (순서 바꾸기는 두 개가 함께 바뀜) */
   putLocations(locations: Location[]): Promise<void>;
   deleteLocation(id: string): Promise<void>;
+  /** 모든 위치·재고를 지우고 주어진 것으로 바꾼다. 한 트랜잭션이라 실패하면 그대로 남는다 */
+  replaceAll(locations: Location[], items: Item[]): Promise<void>;
 }
 
 interface WhereHouseDB extends DBSchema {
@@ -72,6 +74,28 @@ export function createIdbAdapter(dbName = "wherehouse"): StorageAdapter {
     },
     async deleteLocation(id) {
       await (await db).delete("locations", id);
+    },
+    async replaceAll(locations, items) {
+      const tx = (await db).transaction(["locations", "items"], "readwrite");
+      const locStore = tx.objectStore("locations");
+      const itemStore = tx.objectStore("items");
+      const pending: Promise<unknown>[] = [tx.done];
+      try {
+        pending.push(locStore.clear(), itemStore.clear());
+        for (const l of locations) pending.push(locStore.put(l));
+        for (const i of items) pending.push(itemStore.put(i));
+        await Promise.all(pending);
+      } catch (err) {
+        // put이 동기로 throw하면(예: id 없음) 트랜잭션이 자동 취소되지 않고
+        // 이미 요청한 clear()만 커밋된다. 직접 취소해 기존 데이터를 지킨다
+        try {
+          tx.abort();
+        } catch {
+          // 이미 끝났거나 취소된 트랜잭션
+        }
+        await Promise.allSettled(pending); // 취소로 실패한 요청들을 처리해 둔다
+        throw err;
+      }
     },
   };
 }

@@ -1,7 +1,7 @@
 import "fake-indexeddb/auto";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIdbAdapter } from "./storage";
-import type { ItemInput } from "./types";
+import type { Item, ItemInput } from "./types";
 
 const input: ItemInput = {
   name: "휴지",
@@ -101,6 +101,47 @@ describe("IndexedDB 저장소 어댑터", () => {
       .map((l) => l.name)
       .sort();
     expect(names).toEqual(["부엌", "안방", "찬장"].sort());
+  });
+
+  it("replaceAll은 기존 위치·재고를 모두 지우고 바꾼다", async () => {
+    const name = `test-${n++}`;
+    const db = createIdbAdapter(name);
+    await db.addItem(input);
+    const veranda = {
+      id: "veranda",
+      name: "베란다",
+      parentId: null,
+      depth: 0,
+      order: 0,
+    };
+    const imported = {
+      ...input,
+      id: "imported",
+      locationId: "veranda",
+      createdAt: "2026-11-01T00:00:00.000Z",
+      updatedAt: "2026-11-01T00:00:00.000Z",
+    };
+
+    await db.replaceAll([veranda], [imported]);
+
+    const reopened = createIdbAdapter(name);
+    expect(await reopened.getLocations()).toEqual([veranda]);
+    expect(await reopened.getItems()).toEqual([imported]);
+  });
+
+  it("replaceAll 중 하나라도 실패하면 아무것도 바뀌지 않는다", async () => {
+    const name = `test-${n++}`;
+    const db = createIdbAdapter(name);
+    const kept = await db.addItem(input);
+
+    // id(keyPath)가 없는 재고는 저장에 실패한다
+    await expect(
+      db.replaceAll([], [{ ...input } as unknown as Item]),
+    ).rejects.toThrow();
+
+    const reopened = createIdbAdapter(name);
+    expect(await reopened.getItems()).toEqual([kept]);
+    expect(await reopened.getLocations()).toHaveLength(3);
   });
 
   it("없는 재고를 수정하면 에러가 난다", async () => {
