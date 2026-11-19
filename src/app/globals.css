@@ -1,7 +1,66 @@
 @import "tailwindcss";
 
+/* 색은 의미별 토큰으로만 쓴다. 다크모드는 시스템 설정을 따라 값만 바뀐다 (005)
+   값은 Tailwind 팔레트(zinc·red·amber)의 hex. var(--color-zinc-…)는 쓰는 클래스가 없으면 출력되지 않아 직접 적는다 */
+:root {
+  color-scheme: light dark; /* 날짜 선택기·select 같은 기본 입력 요소도 따라가게 */
+  --bg: #ffffff;
+  --fg: #171717;
+  --muted: #52525b;
+  --line: #e4e4e7;
+  --line-strong: #d4d4d8;
+  --surface: #fafafa;
+  --surface-active: #f4f4f5;
+  --primary: #18181b;
+  --on-primary: #ffffff;
+  --danger: #b91c1c;
+  --danger-soft: #fee2e2;
+  --danger-strong: #991b1b;
+  --warn: #78350f;
+  --warn-soft: #fef3c7;
+  --warn-line: #fbbf24;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #09090b;
+    --fg: #f4f4f5;
+    --muted: #a1a1aa;
+    --line: #27272a;
+    --line-strong: #3f3f46;
+    --surface: #18181b;
+    --surface-active: #27272a;
+    --primary: #f4f4f5; /* 버튼은 반전: 흰 바탕 + 검은 글자 */
+    --on-primary: #18181b;
+    --danger: #f87171;
+    --danger-soft: #450a0a;
+    --danger-strong: #fca5a5;
+    --warn: #fde68a;
+    --warn-soft: #451a03;
+    --warn-line: #b45309;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-surface: var(--surface);
+  --color-surface-active: var(--surface-active);
+  --color-primary: var(--primary);
+  --color-on-primary: var(--on-primary);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-strong: var(--danger-strong);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-line: var(--warn-line);
+}
+
 body {
-  background: #ffffff;
-  color: #171717;
+  background: var(--bg);
+  color: var(--fg);
   font-family: system-ui, sans-serif;
 }

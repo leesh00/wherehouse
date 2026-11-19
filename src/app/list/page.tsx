@@ -50,7 +50,7 @@ function ItemList() {
           exists && (
             <Link
               href={`/item/new/?loc=${loc}`}
-              className="flex min-h-11 items-center rounded-lg bg-zinc-900 px-4 font-semibold text-white"
+              className="flex min-h-11 items-center rounded-lg bg-primary px-4 font-semibold text-on-primary"
             >
               + 등록
             </Link>
@@ -60,7 +60,7 @@ function ItemList() {
       {chips.length > 1 && (
         <nav
           aria-label="하위 위치"
-          className="flex gap-2 overflow-x-auto border-b border-zinc-200 px-4 py-2"
+          className="flex gap-2 overflow-x-auto border-b border-line px-4 py-2"
         >
           {chips.map((c) => {
             const selected = c.id === loc;
@@ -72,8 +72,8 @@ function ItemList() {
                 aria-current={selected ? "page" : undefined}
                 className={`flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm ${
                   selected
-                    ? "border-zinc-900 bg-zinc-900 font-semibold text-white"
-                    : "border-zinc-300"
+                    ? "border-primary bg-primary font-semibold text-on-primary"
+                    : "border-line-strong"
                 }`}
               >
                 {selected && "✓ "}
@@ -88,16 +88,16 @@ function ItemList() {
       ) : !exists ? (
         <p className="p-4">위치를 찾을 수 없습니다.</p>
       ) : items.length === 0 ? (
-        <p className="p-4 text-zinc-600">
+        <p className="p-4 text-muted">
           등록된 재고가 없습니다. 오른쪽 위 &lsquo;+ 등록&rsquo;으로 추가하세요.
         </p>
       ) : (
         <>
-          <div className="flex justify-end border-b border-zinc-200 px-4 py-2">
+          <div className="flex justify-end border-b border-line px-4 py-2">
             <label className="flex items-center gap-2 text-sm">
               정렬
               <select
-                className="min-h-11 rounded-lg border border-zinc-300 px-2 text-base"
+                className="min-h-11 rounded-lg border border-line-strong px-2 text-base"
                 value={sort}
                 onChange={(e) => {
                   const v = e.target.value;
@@ -115,7 +115,7 @@ function ItemList() {
               </select>
             </label>
           </div>
-          <ul className="divide-y divide-zinc-200">
+          <ul className="divide-y divide-line">
             {items.map((item) => (
               <ItemRow
                 key={item.id}

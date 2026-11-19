@@ -20,7 +20,7 @@ const toIso = (date: string) => new Date(date).toISOString();
 
 const field = "flex flex-col gap-1";
 const input =
-  "min-h-11 w-full min-w-0 rounded-lg border border-zinc-300 px-3 text-base";
+  "min-h-11 w-full min-w-0 rounded-lg border border-line-strong px-3 text-base";
 
 export default function ItemForm({
   locations,
@@ -105,7 +105,7 @@ export default function ItemForm({
           aria-describedby={duplicates.length ? "duplicate-hint" : undefined}
         />
         {duplicates.length > 0 && (
-          <span id="duplicate-hint" className="text-sm text-amber-900">
+          <span id="duplicate-hint" className="text-sm text-warn">
             ⚠ 같은 이름의 재고가 있습니다: {duplicateSummary}
           </span>
         )}
@@ -187,29 +187,29 @@ export default function ItemForm({
         />
       </label>
       {error && (
-        <p role="alert" className="text-red-700">
+        <p role="alert" className="text-danger">
           ⚠ {error}
         </p>
       )}
       {showWarning ? (
         <div
           role="alert"
-          className="flex flex-col gap-3 rounded-lg border border-amber-400 bg-amber-50 p-3"
+          className="flex flex-col gap-3 rounded-lg border border-warn-line bg-warn-soft p-3"
         >
-          <p className="text-amber-900">
+          <p className="text-warn">
             ⚠ 같은 이름의 재고가 이미 있습니다: {duplicateSummary}
           </p>
           <div className="flex gap-2">
             <Link
               href={`/?q=${encodeURIComponent(form.name.trim())}`}
-              className="flex min-h-11 flex-1 items-center justify-center rounded-lg border border-zinc-300 bg-white font-semibold"
+              className="flex min-h-11 flex-1 items-center justify-center rounded-lg border border-line-strong bg-bg font-semibold"
             >
               기존 재고 보기
             </Link>
             <button
               type="submit"
               disabled={saving}
-              className="min-h-11 flex-1 rounded-lg bg-zinc-900 font-semibold text-white disabled:opacity-50"
+              className="min-h-11 flex-1 rounded-lg bg-primary font-semibold text-on-primary disabled:opacity-50"
             >
               {saving ? "저장 중…" : `그래도 ${submitLabel}`}
             </button>
@@ -219,7 +219,7 @@ export default function ItemForm({
         <button
           type="submit"
           disabled={saving}
-          className="min-h-11 rounded-lg bg-zinc-900 font-semibold text-white disabled:opacity-50"
+          className="min-h-11 rounded-lg bg-primary font-semibold text-on-primary disabled:opacity-50"
         >
           {saving ? "저장 중…" : submitLabel}
         </button>

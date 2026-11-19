@@ -47,7 +47,7 @@ function Home() {
           type="search"
           aria-label="재고 검색"
           placeholder="이름·분류·메모 검색"
-          className="min-h-11 w-full rounded-lg border border-zinc-300 px-3 text-base"
+          className="min-h-11 w-full rounded-lg border border-line-strong px-3 text-base"
           value={query}
           onChange={(e) => handleChange(e.target.value)}
         />
@@ -56,15 +56,15 @@ function Home() {
         <p className="p-4">불러오는 중…</p>
       ) : searching ? (
         results.length === 0 ? (
-          <p className="p-4 text-zinc-600">
+          <p className="p-4 text-muted">
             &lsquo;{query.trim()}&rsquo;에 해당하는 재고가 없습니다.
           </p>
         ) : (
           <>
-            <p className="px-4 pt-3 text-sm text-zinc-600">
+            <p className="px-4 pt-3 text-sm text-muted">
               검색 결과 {results.length}개
             </p>
-            <ul className="divide-y divide-zinc-200">
+            <ul className="divide-y divide-line">
               {results.map((item) => (
                 <ItemRow
                   key={item.id}
@@ -83,7 +83,7 @@ function Home() {
             <li key={room.id}>
               <Link
                 href={`/list/?loc=${room.id}`}
-                className="flex aspect-square items-center justify-center rounded-2xl border border-zinc-200 bg-zinc-50 text-lg font-semibold active:bg-zinc-100"
+                className="flex aspect-square items-center justify-center rounded-2xl border border-line bg-surface text-lg font-semibold active:bg-surface-active"
               >
                 {room.name}
               </Link>

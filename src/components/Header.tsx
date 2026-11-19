@@ -10,7 +10,7 @@ export default function Header({
   action?: React.ReactNode;
 }) {
   return (
-    <header className="flex min-h-14 items-center gap-2 border-b border-zinc-200 px-2">
+    <header className="flex min-h-14 items-center gap-2 border-b border-line px-2">
       {backHref && (
         <Link
           href={backHref}

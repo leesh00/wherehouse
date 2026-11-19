@@ -82,7 +82,7 @@ export default function Settings() {
   return (
     <>
       <Header title="설정" backHref="/" />
-      <ul className="divide-y divide-zinc-200">
+      <ul className="divide-y divide-line">
         <li>
           <Link href="/settings/locations/" className={row}>
             위치 관리
@@ -118,7 +118,7 @@ export default function Settings() {
         </li>
       </ul>
       {message && (
-        <p role="status" className="p-4 text-zinc-700">
+        <p role="status" className="p-4 text-muted">
           {message}
         </p>
       )}

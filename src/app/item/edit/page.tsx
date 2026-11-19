@@ -64,7 +64,7 @@ function EditItem() {
             <button
               type="button"
               onClick={handleDelete}
-              className="min-h-11 w-full rounded-lg border border-red-700 font-semibold text-red-700"
+              className="min-h-11 w-full rounded-lg border border-danger font-semibold text-danger"
             >
               삭제
             </button>

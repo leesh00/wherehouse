@@ -12,11 +12,11 @@ import type { Location } from "@/core/types";
 import { useInventory, useLoadInventory } from "@/hooks/useInventory";
 
 const input =
-  "min-h-11 w-full min-w-0 flex-1 rounded-lg border border-zinc-300 px-3 text-base";
+  "min-h-11 w-full min-w-0 flex-1 rounded-lg border border-line-strong px-3 text-base";
 const button =
-  "min-h-11 shrink-0 rounded-lg border border-zinc-300 px-3 font-semibold disabled:opacity-40";
+  "min-h-11 shrink-0 rounded-lg border border-line-strong px-3 font-semibold disabled:opacity-40";
 const iconButton =
-  "size-11 shrink-0 rounded-lg border border-zinc-300 disabled:opacity-30";
+  "size-11 shrink-0 rounded-lg border border-line-strong disabled:opacity-30";
 
 /** 이름 입력 + 저장. 빈 이름은 저장하지 않는다 */
 function NameForm({
@@ -63,7 +63,7 @@ function NameForm({
         </button>
       </div>
       {error && (
-        <p role="alert" className="text-sm text-red-700">
+        <p role="alert" className="text-sm text-danger">
           ⚠ {error}
         </p>
       )}
@@ -86,7 +86,7 @@ function Editor({ loc, onDone }: { loc: Location; onDone: () => void }) {
     .join(", ");
 
   return (
-    <div className="flex flex-col gap-3 border-l-4 border-zinc-300 bg-zinc-50 p-3">
+    <div className="flex flex-col gap-3 border-l-4 border-line-strong bg-surface p-3">
       <NameForm
         label="위치 이름"
         initial={loc.name}
@@ -109,7 +109,7 @@ function Editor({ loc, onDone }: { loc: Location; onDone: () => void }) {
           type="button"
           disabled={!!reason}
           aria-describedby={reason ? `blocked-${loc.id}` : undefined}
-          className={`${button} border-red-700 text-red-700`}
+          className={`${button} border-danger text-danger`}
           onClick={async () => {
             if (
               !confirm(`'${loc.name}' 위치를 삭제할까요? 되돌릴 수 없습니다.`)
@@ -126,7 +126,7 @@ function Editor({ loc, onDone }: { loc: Location; onDone: () => void }) {
           삭제
         </button>
         {reason && (
-          <p id={`blocked-${loc.id}`} className="text-sm text-zinc-600">
+          <p id={`blocked-${loc.id}`} className="text-sm text-muted">
             {reason}가 있어 삭제할 수 없습니다.
           </p>
         )}
@@ -153,7 +153,7 @@ export default function LocationsPage() {
         <p className="p-4">불러오는 중…</p>
       ) : (
         <>
-          <ul className="divide-y divide-zinc-200">
+          <ul className="divide-y divide-line">
             {flattenTree(locations).map((loc) => (
               <li key={loc.id}>
                 <div
@@ -162,7 +162,7 @@ export default function LocationsPage() {
                 >
                   <span className="min-w-0 flex-1 truncate">
                     {loc.depth > 0 && (
-                      <span aria-hidden className="text-zinc-400">
+                      <span aria-hidden className="text-muted">
                         └{" "}
                       </span>
                     )}
@@ -207,7 +207,7 @@ export default function LocationsPage() {
               </li>
             ))}
           </ul>
-          <div className="border-t border-zinc-200 p-4">
+          <div className="border-t border-line p-4">
             <NameForm
               label="새 방 이름"
               submitLabel="+ 방 추가"
