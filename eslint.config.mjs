@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Capacitor 네이티브 프로젝트 (빌드된 웹 파일 복사본 포함)
+    "android/**",
   ]),
 ]);
 

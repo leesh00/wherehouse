@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">WhereHouse</string>
+    <string name="title_activity_main">WhereHouse</string>
+    <string name="package_name">io.github.leesh00.wherehouse</string>
+    <string name="custom_url_scheme">io.github.leesh00.wherehouse</string>
+</resources>
