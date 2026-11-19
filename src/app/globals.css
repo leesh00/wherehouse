@@ -1,44 +1,37 @@
 @import "tailwindcss";
 
-/* 색은 의미별 토큰으로만 쓴다. 다크모드는 시스템 설정을 따라 값만 바뀐다 (005)
-   값은 Tailwind 팔레트(zinc·red·amber)의 hex. var(--color-zinc-…)는 쓰는 클래스가 없으면 출력되지 않아 직접 적는다 */
+/* 색은 의미별 토큰으로만 쓴다 (005)
+   - light-dark(라이트, 다크): color-scheme에 따라 값이 골라진다
+   - 기본은 시스템 설정을 따르고, 설정 화면에서 고르면 <html data-theme>로 고정된다
+   - 값은 Tailwind 팔레트(zinc·red·amber)의 hex. var(--color-zinc-…)는 쓰는 클래스가 없으면 출력되지 않아 직접 적는다 */
 :root {
   color-scheme: light dark; /* 날짜 선택기·select 같은 기본 입력 요소도 따라가게 */
-  --bg: #ffffff;
-  --fg: #171717;
-  --muted: #52525b;
-  --line: #e4e4e7;
-  --line-strong: #d4d4d8;
-  --surface: #fafafa;
-  --surface-active: #f4f4f5;
-  --primary: #18181b;
-  --on-primary: #ffffff;
-  --danger: #b91c1c;
-  --danger-soft: #fee2e2;
-  --danger-strong: #991b1b;
-  --warn: #78350f;
-  --warn-soft: #fef3c7;
-  --warn-line: #fbbf24;
+  --bg: light-dark(#ffffff, #09090b);
+  --fg: light-dark(#171717, #f4f4f5);
+  --muted: light-dark(#52525b, #a1a1aa);
+  --line: light-dark(#e4e4e7, #27272a);
+  --line-strong: light-dark(#d4d4d8, #3f3f46);
+  --surface: light-dark(#fafafa, #18181b);
+  --surface-active: light-dark(#f4f4f5, #27272a);
+  --primary: light-dark(
+    #18181b,
+    #f4f4f5
+  ); /* 다크에서는 반전: 밝은 바탕 + 어두운 글자 */
+  --on-primary: light-dark(#ffffff, #18181b);
+  --danger: light-dark(#b91c1c, #f87171);
+  --danger-soft: light-dark(#fee2e2, #450a0a);
+  --danger-strong: light-dark(#991b1b, #fca5a5);
+  --warn: light-dark(#78350f, #fde68a);
+  --warn-soft: light-dark(#fef3c7, #451a03);
+  --warn-line: light-dark(#fbbf24, #b45309);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #09090b;
-    --fg: #f4f4f5;
-    --muted: #a1a1aa;
-    --line: #27272a;
-    --line-strong: #3f3f46;
-    --surface: #18181b;
-    --surface-active: #27272a;
-    --primary: #f4f4f5; /* 버튼은 반전: 흰 바탕 + 검은 글자 */
-    --on-primary: #18181b;
-    --danger: #f87171;
-    --danger-soft: #450a0a;
-    --danger-strong: #fca5a5;
-    --warn: #fde68a;
-    --warn-soft: #451a03;
-    --warn-line: #b45309;
-  }
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 @theme inline {

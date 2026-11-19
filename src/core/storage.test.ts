@@ -1,4 +1,5 @@
 import "fake-indexeddb/auto";
+import { openDB } from "idb";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIdbAdapter } from "./storage";
 import type { Item, ItemInput } from "./types";
@@ -101,6 +102,42 @@ describe("IndexedDB 저장소 어댑터", () => {
       .map((l) => l.name)
       .sort();
     expect(names).toEqual(["부엌", "안방", "찬장"].sort());
+  });
+
+  it("화면 모드는 고른 적 없으면 null, 저장하면 새로 열어도 유지된다", async () => {
+    const name = `test-${n++}`;
+    expect(await createIdbAdapter(name).getTheme()).toBeNull();
+    await createIdbAdapter(name).setTheme("dark");
+    expect(await createIdbAdapter(name).getTheme()).toBe("dark");
+  });
+
+  it("버전 1 DB를 열면 기존 위치·재고를 그대로 두고 설정 저장소만 추가한다", async () => {
+    const name = `test-${n++}`;
+    // 1차~2차 초반에 쓰던 버전 1 구조를 직접 만든다
+    const v1 = await openDB(name, 1, {
+      upgrade(db) {
+        db.createObjectStore("locations", { keyPath: "id" }).put({
+          id: "room",
+          name: "안방",
+          parentId: null,
+          depth: 0,
+          order: 0,
+        });
+        db.createObjectStore("items", { keyPath: "id" }).put({
+          ...input,
+          id: "old",
+          createdAt: "2026-11-01T00:00:00.000Z",
+          updatedAt: "2026-11-01T00:00:00.000Z",
+        });
+      },
+    });
+    v1.close();
+
+    const db = createIdbAdapter(name);
+    expect((await db.getLocations()).map((l) => l.name)).toEqual(["안방"]);
+    expect((await db.getItems()).map((i) => i.id)).toEqual(["old"]);
+    await db.setTheme("light");
+    expect(await db.getTheme()).toBe("light");
   });
 
   it("replaceAll은 기존 위치·재고를 모두 지우고 바꾼다", async () => {

@@ -8,7 +8,7 @@ import {
   moveLocation as getMovedLocations,
 } from "@/core/location";
 import { createIdbAdapter, type StorageAdapter } from "@/core/storage";
-import type { Item, ItemInput, Location } from "@/core/types";
+import type { Item, ItemInput, Location, Theme } from "@/core/types";
 
 // 빌드(프리렌더) 중에는 indexedDB가 없으므로 처음 쓸 때 연다
 let adapter: StorageAdapter | undefined;
@@ -18,6 +18,7 @@ interface InventoryState {
   loaded: boolean;
   locations: Location[];
   items: Item[];
+  theme: Theme | null; // null이면 시스템 설정을 따름
   load: () => Promise<void>;
   addItem: (input: ItemInput) => Promise<Item>;
   updateItem: (id: string, patch: Partial<ItemInput>) => Promise<Item>;
@@ -27,6 +28,7 @@ interface InventoryState {
   moveLocation: (id: string, dir: -1 | 1) => Promise<void>;
   deleteLocation: (id: string) => Promise<void>;
   importData: (locations: Location[], items: Item[]) => Promise<void>;
+  setTheme: (theme: Theme) => Promise<void>;
 }
 
 // 바뀐 위치들을 id 기준으로 덮어쓴다 (없던 id는 추가)
@@ -39,13 +41,19 @@ export const useInventory = create<InventoryState>()((set, get) => ({
   loaded: false,
   locations: [],
   items: [],
+  theme: null,
   async load() {
     if (get().loaded) return;
-    const [locations, items] = await Promise.all([
+    const [locations, items, theme] = await Promise.all([
       db().getLocations(),
       db().getItems(),
+      db().getTheme(),
     ]);
-    set({ loaded: true, locations, items });
+    set({ loaded: true, locations, items, theme });
+  },
+  async setTheme(theme) {
+    await db().setTheme(theme);
+    set({ theme });
   },
   // 저장 성공 후에만 스토어 갱신
   async addItem(input) {

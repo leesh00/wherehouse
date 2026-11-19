@@ -21,3 +21,5 @@ export interface Item {
 }
 
 export type ItemInput = Omit<Item, "id" | "createdAt" | "updatedAt">;
+
+export type Theme = "light" | "dark";

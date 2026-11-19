@@ -1,6 +1,6 @@
 import { openDB, type DBSchema } from "idb";
 import { DEFAULT_LOCATIONS } from "./location";
-import type { Item, ItemInput, Location } from "./types";
+import type { Item, ItemInput, Location, Theme } from "./types";
 
 export interface StorageAdapter {
   getLocations(): Promise<Location[]>;
@@ -14,23 +14,40 @@ export interface StorageAdapter {
   deleteLocation(id: string): Promise<void>;
   /** 모든 위치·재고를 지우고 주어진 것으로 바꾼다. 한 트랜잭션이라 실패하면 그대로 남는다 */
   replaceAll(locations: Location[], items: Item[]): Promise<void>;
+  /** 사용자가 고른 화면 모드. 고른 적 없으면 null(시스템 설정을 따름) */
+  getTheme(): Promise<Theme | null>;
+  setTheme(theme: Theme): Promise<void>;
 }
 
 interface WhereHouseDB extends DBSchema {
   locations: { key: string; value: Location };
   items: { key: string; value: Item };
+  settings: { key: string; value: unknown };
 }
 
 export function createIdbAdapter(dbName = "wherehouse"): StorageAdapter {
-  const db = openDB<WhereHouseDB>(dbName, 1, {
-    upgrade(db) {
-      const locations = db.createObjectStore("locations", { keyPath: "id" });
-      db.createObjectStore("items", { keyPath: "id" });
-      for (const loc of DEFAULT_LOCATIONS) locations.put(loc);
+  // 버전을 올릴 때는 이전 버전에서 없던 것만 만든다 (기존 데이터 유지)
+  const db = openDB<WhereHouseDB>(dbName, 2, {
+    upgrade(db, oldVersion) {
+      if (oldVersion < 1) {
+        const locations = db.createObjectStore("locations", {
+          keyPath: "id",
+        });
+        db.createObjectStore("items", { keyPath: "id" });
+        for (const loc of DEFAULT_LOCATIONS) locations.put(loc);
+      }
+      if (oldVersion < 2) db.createObjectStore("settings");
     },
   });
 
   return {
+    async getTheme() {
+      const v = await (await db).get("settings", "theme");
+      return v === "light" || v === "dark" ? v : null;
+    },
+    async setTheme(theme) {
+      await (await db).put("settings", theme, "theme");
+    },
     async getLocations() {
       return (await db).getAll("locations");
     },

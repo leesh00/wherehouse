@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import Header from "@/components/Header";
 import { backupFileName, buildBackup, parseBackup } from "@/core/backup";
 import { useInventory, useLoadInventory } from "@/hooks/useInventory";
 
+const DARK_QUERY = "(prefers-color-scheme: dark)";
 const row = "flex min-h-14 w-full items-center justify-between px-4 text-left";
 
 export default function Settings() {
@@ -13,6 +14,19 @@ export default function Settings() {
   const locations = useInventory((s) => s.locations);
   const items = useInventory((s) => s.items);
   const importData = useInventory((s) => s.importData);
+  const theme = useInventory((s) => s.theme);
+  const setTheme = useInventory((s) => s.setTheme);
+  const systemDark = useSyncExternalStore(
+    (onChange) => {
+      const m = matchMedia(DARK_QUERY);
+      m.addEventListener("change", onChange);
+      return () => m.removeEventListener("change", onChange);
+    },
+    () => matchMedia(DARK_QUERY).matches,
+    () => false, // 빌드(프리렌더) 시
+  );
+  // 고른 적 없으면 지금 시스템 설정 기준
+  const isDark = (theme ?? (systemDark ? "dark" : "light")) === "dark";
   const [message, setMessage] = useState("");
 
   function handleExport() {
@@ -88,6 +102,41 @@ export default function Settings() {
             위치 관리
             <span aria-hidden>›</span>
           </Link>
+        </li>
+        <li>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={isDark}
+            disabled={!loaded}
+            className={row}
+            onClick={() => setTheme(isDark ? "light" : "dark")}
+          >
+            <span>
+              다크모드
+              {theme === null && (
+                <span className="block text-sm text-muted">
+                  시스템 설정을 따르는 중
+                </span>
+              )}
+            </span>
+            {/* 색만으로 구분하지 않도록 켜짐/꺼짐 글자도 표시 */}
+            <span className="flex items-center gap-2 text-sm">
+              {isDark ? "켜짐" : "꺼짐"}
+              <span
+                aria-hidden
+                className={`flex h-7 w-12 items-center rounded-full border-2 p-0.5 ${
+                  isDark
+                    ? "justify-end border-primary bg-primary"
+                    : "justify-start border-line-strong bg-surface"
+                }`}
+              >
+                <span
+                  className={`size-5 rounded-full ${isDark ? "bg-on-primary" : "bg-muted"}`}
+                />
+              </span>
+            </span>
+          </button>
         </li>
         <li>
           <button
