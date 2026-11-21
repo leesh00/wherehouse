@@ -1,0 +1,159 @@
+{
+  "app": "wherehouse",
+  "version": 1,
+  "exportedAt": "2026-11-21T00:00:00.000Z",
+  "locations": [
+    { "id": "room", "name": "방", "parentId": null, "depth": 0, "order": 0 },
+    {
+      "id": "kitchen",
+      "name": "부엌",
+      "parentId": null,
+      "depth": 0,
+      "order": 1
+    },
+    {
+      "id": "bathroom",
+      "name": "화장실",
+      "parentId": null,
+      "depth": 0,
+      "order": 2
+    },
+    {
+      "id": "room-drawer1",
+      "name": "1번 서랍장",
+      "parentId": "room",
+      "depth": 1,
+      "order": 0
+    },
+    {
+      "id": "room-drawer1-2",
+      "name": "2칸",
+      "parentId": "room-drawer1",
+      "depth": 2,
+      "order": 0
+    },
+    {
+      "id": "kitchen-fridge",
+      "name": "냉장고",
+      "parentId": "kitchen",
+      "depth": 1,
+      "order": 0
+    },
+    {
+      "id": "kitchen-sink",
+      "name": "싱크대 하부장",
+      "parentId": "kitchen",
+      "depth": 1,
+      "order": 1
+    },
+    {
+      "id": "bath-cabinet",
+      "name": "수납장",
+      "parentId": "bathroom",
+      "depth": 1,
+      "order": 0
+    }
+  ],
+  "items": [
+    {
+      "id": "i1",
+      "name": "우유",
+      "category": "식품",
+      "locationId": "kitchen-fridge",
+      "quantity": 1,
+      "unit": "개",
+      "purchasedAt": "2026-11-15T00:00:00.000Z",
+      "expiresAt": "2026-11-18T00:00:00.000Z",
+      "memo": "기한 지남 확인용",
+      "createdAt": "2026-11-15T09:00:00.000Z",
+      "updatedAt": "2026-11-15T09:00:00.000Z"
+    },
+    {
+      "id": "i2",
+      "name": "두부",
+      "category": "식품",
+      "locationId": "kitchen-fridge",
+      "quantity": 2,
+      "unit": "모",
+      "purchasedAt": "2026-11-20T00:00:00.000Z",
+      "expiresAt": "2026-11-24T00:00:00.000Z",
+      "memo": "임박(D-N) 확인용",
+      "createdAt": "2026-11-20T09:00:00.000Z",
+      "updatedAt": "2026-11-20T09:00:00.000Z"
+    },
+    {
+      "id": "i3",
+      "name": "라면",
+      "category": "식품",
+      "locationId": "kitchen-sink",
+      "quantity": 5,
+      "unit": "봉",
+      "purchasedAt": "2026-11-01T00:00:00.000Z",
+      "expiresAt": "2027-04-30T00:00:00.000Z",
+      "memo": "",
+      "createdAt": "2026-11-01T09:00:00.000Z",
+      "updatedAt": "2026-11-01T09:00:00.000Z"
+    },
+    {
+      "id": "i4",
+      "name": "주방세제",
+      "category": "세제",
+      "locationId": "kitchen-sink",
+      "quantity": 1,
+      "unit": "통",
+      "purchasedAt": "2026-10-20T00:00:00.000Z",
+      "memo": "유통기한 없음",
+      "createdAt": "2026-10-20T09:00:00.000Z",
+      "updatedAt": "2026-10-20T09:00:00.000Z"
+    },
+    {
+      "id": "i5",
+      "name": "건전지 AA",
+      "category": "생활용품",
+      "locationId": "room-drawer1-2",
+      "quantity": 8,
+      "unit": "개",
+      "purchasedAt": "2026-09-01T00:00:00.000Z",
+      "memo": "3단 위치(방 > 1번 서랍장 > 2칸)",
+      "createdAt": "2026-09-01T09:00:00.000Z",
+      "updatedAt": "2026-09-01T09:00:00.000Z"
+    },
+    {
+      "id": "i6",
+      "name": "마스크",
+      "category": "생활용품",
+      "locationId": "room-drawer1",
+      "quantity": 0,
+      "unit": "장",
+      "purchasedAt": "2026-08-10T00:00:00.000Z",
+      "memo": "수량 0 확인용",
+      "createdAt": "2026-08-10T09:00:00.000Z",
+      "updatedAt": "2026-08-10T09:00:00.000Z"
+    },
+    {
+      "id": "i7",
+      "name": "휴지",
+      "category": "생활용품",
+      "locationId": "bath-cabinet",
+      "quantity": 12,
+      "unit": "롤",
+      "purchasedAt": "2026-11-05T00:00:00.000Z",
+      "memo": "",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    },
+    {
+      "id": "i8",
+      "name": "치약",
+      "category": "세면용품",
+      "locationId": "bathroom",
+      "quantity": 2,
+      "unit": "개",
+      "purchasedAt": "2026-11-10T00:00:00.000Z",
+      "expiresAt": "2027-12-31T00:00:00.000Z",
+      "memo": "",
+      "createdAt": "2026-11-10T09:00:00.000Z",
+      "updatedAt": "2026-11-10T09:00:00.000Z"
+    }
+  ]
+}

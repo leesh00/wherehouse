@@ -1,0 +1,118 @@
+{
+  "app": "wherehouse",
+  "version": 1,
+  "exportedAt": "2026-11-21T00:00:00.000Z",
+  "locations": [
+    { "id": "room", "name": "방", "parentId": null, "depth": 0, "order": 0 },
+    {
+      "id": "kitchen",
+      "name": "부엌",
+      "parentId": null,
+      "depth": 0,
+      "order": 1
+    },
+    {
+      "id": "bathroom",
+      "name": "화장실",
+      "parentId": null,
+      "depth": 0,
+      "order": 2
+    },
+    {
+      "id": "kitchen-fridge",
+      "name": "냉장고",
+      "parentId": "kitchen",
+      "depth": 1,
+      "order": 0
+    },
+    {
+      "id": "bad-depth",
+      "name": "잘못된 depth",
+      "parentId": "room",
+      "depth": 2,
+      "order": 0
+    },
+    {
+      "id": "bad-child",
+      "name": "잘못된 위치의 하위",
+      "parentId": "bad-depth",
+      "depth": 2,
+      "order": 0
+    }
+  ],
+  "items": [
+    {
+      "id": "i1",
+      "name": "우유",
+      "category": "식품",
+      "locationId": "kitchen-fridge",
+      "quantity": 1,
+      "unit": "개",
+      "purchasedAt": "2026-11-15T00:00:00.000Z",
+      "expiresAt": "2026-11-25T00:00:00.000Z",
+      "memo": "정상",
+      "createdAt": "2026-11-15T09:00:00.000Z",
+      "updatedAt": "2026-11-15T09:00:00.000Z"
+    },
+    {
+      "id": "i2",
+      "name": "휴지",
+      "category": "생활용품",
+      "locationId": "bathroom",
+      "quantity": 6,
+      "unit": "롤",
+      "purchasedAt": "2026-11-05T00:00:00.000Z",
+      "memo": "정상",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    },
+    {
+      "id": "i3",
+      "name": "수량 음수",
+      "category": "",
+      "locationId": "room",
+      "quantity": -1,
+      "unit": "개",
+      "purchasedAt": "2026-11-05T00:00:00.000Z",
+      "memo": "제외돼야 함",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    },
+    {
+      "id": "i4",
+      "name": "없는 위치",
+      "category": "",
+      "locationId": "nowhere",
+      "quantity": 1,
+      "unit": "개",
+      "purchasedAt": "2026-11-05T00:00:00.000Z",
+      "memo": "제외돼야 함",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    },
+    {
+      "id": "i5",
+      "name": "잘못된 위치의 재고",
+      "category": "",
+      "locationId": "bad-depth",
+      "quantity": 1,
+      "unit": "개",
+      "purchasedAt": "2026-11-05T00:00:00.000Z",
+      "memo": "제외돼야 함",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    },
+    {
+      "id": "i6",
+      "name": "날짜 오류",
+      "category": "",
+      "locationId": "room",
+      "quantity": 1,
+      "unit": "개",
+      "purchasedAt": "어제",
+      "memo": "제외돼야 함",
+      "createdAt": "2026-11-05T09:00:00.000Z",
+      "updatedAt": "2026-11-05T09:00:00.000Z"
+    }
+  ]
+}

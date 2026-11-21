@@ -3,3 +3,4 @@ out
 node_modules
 package-lock.json
 android
+docs/test-data/4-JSON아님.json
