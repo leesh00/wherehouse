@@ -34,7 +34,7 @@
 - 동적 경로(\[id]) 사용 금지. id는 쿼리 파라미터로 넘긴다.
 
   - 홈: /
-  - 목록: /list?loc=위치id
+  - 방: /room?loc=방id (&open=가구id면 그 가구의 목록 창이 열린 상태)
   - 등록: /item/new?loc=위치id
   - 수정: /item/edit?id=재고id
 
