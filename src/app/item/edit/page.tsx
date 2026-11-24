@@ -21,13 +21,13 @@ function EditItem() {
   const deleteItem = useInventory((s) => s.deleteItem);
   // 삭제 후 이동 전까지 "찾을 수 없음"이 잠깐 보이지 않게
   const [deletedTo, setDeletedTo] = useState<string | null>(null);
-  const backHref = searchHref ?? (item ? `/list/?loc=${item.locationId}` : "/");
+  const backHref = searchHref ?? (item ? `/room/?loc=${item.locationId}` : "/");
 
   async function handleDelete() {
     if (!item) return;
     if (!confirm(`'${item.name}'을(를) 삭제할까요? 되돌릴 수 없습니다.`))
       return;
-    const to = searchHref ?? `/list/?loc=${item.locationId}`;
+    const to = searchHref ?? `/room/?loc=${item.locationId}`;
     try {
       setDeletedTo(to);
       await deleteItem(item.id);
@@ -57,7 +57,7 @@ function EditItem() {
             submitLabel="저장"
             onSubmit={async (input) => {
               const saved = await updateItem(item.id, input);
-              router.replace(searchHref ?? `/list/?loc=${saved.locationId}`);
+              router.replace(searchHref ?? `/room/?loc=${saved.locationId}`);
             }}
           />
           <div className="px-4 pb-8">

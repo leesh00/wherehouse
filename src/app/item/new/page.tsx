@@ -13,7 +13,7 @@ function NewItem() {
   const locations = useInventory((s) => s.locations);
   const items = useInventory((s) => s.items);
   const addItem = useInventory((s) => s.addItem);
-  const backHref = loc ? `/list/?loc=${loc}` : "/";
+  const backHref = loc ? `/room/?loc=${loc}` : "/";
 
   return (
     <>
@@ -34,7 +34,7 @@ function NewItem() {
           submitLabel="등록"
           onSubmit={async (input) => {
             const saved = await addItem(input);
-            router.replace(`/list/?loc=${saved.locationId}`);
+            router.replace(`/room/?loc=${saved.locationId}`);
           }}
         />
       ) : (

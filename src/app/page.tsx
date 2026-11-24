@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import Header from "@/components/Header";
+import HousePlan from "@/components/HousePlan";
 import ItemRow from "@/components/ItemRow";
 import { getLocationPath } from "@/core/location";
 import { searchItems } from "@/core/search";
@@ -16,9 +17,7 @@ function Home() {
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
   const items = useInventory((s) => s.items);
-  const rooms = locations
-    .filter((l) => l.parentId === null)
-    .sort((a, b) => a.order - b.order);
+  const layout = useInventory((s) => s.layout);
   const searching = query.trim() !== "";
   const results = searchItems(items, query);
   const today = new Date().toLocaleDateString("sv-SE"); // 로컬 YYYY-MM-DD
@@ -78,18 +77,7 @@ function Home() {
           </>
         )
       ) : (
-        <ul className="grid grid-cols-2 gap-3 p-4 sm:grid-cols-3">
-          {rooms.map((room) => (
-            <li key={room.id}>
-              <Link
-                href={`/list/?loc=${room.id}`}
-                className="flex aspect-square items-center justify-center rounded-2xl border border-line bg-surface text-lg font-semibold active:bg-surface-active"
-              >
-                {room.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <HousePlan locations={locations} layout={layout} />
       )}
     </>
   );

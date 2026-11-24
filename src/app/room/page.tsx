@@ -68,7 +68,7 @@ function ItemList() {
               <Link
                 key={c.id}
                 replace
-                href={`/list/?loc=${c.id}${sortQuery}`}
+                href={`/room/?loc=${c.id}${sortQuery}`}
                 aria-current={selected ? "page" : undefined}
                 className={`flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm ${
                   selected
@@ -103,7 +103,7 @@ function ItemList() {
                   const v = e.target.value;
                   // 뒤로가기가 정렬 변경마다 쌓이지 않게 replace
                   router.replace(
-                    `/list/?loc=${loc}${v === "created" ? "" : `&sort=${v}`}`,
+                    `/room/?loc=${loc}${v === "created" ? "" : `&sort=${v}`}`,
                   );
                 }}
               >
