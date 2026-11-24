@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { backupFileName, buildBackup, parseBackup } from "./backup";
 import { DEFAULT_LOCATIONS } from "./location";
-import type { Item, Location } from "./types";
+import type { Item, Location, Placement } from "./types";
 
 const drawer: Location = {
   id: "drawer",
@@ -28,12 +28,55 @@ const json = (data: unknown) => JSON.stringify(data);
 
 describe("buildBackup / parseBackup", () => {
   it("내보낸 파일을 그대로 다시 읽을 수 있다", () => {
-    const backup = buildBackup(locations, items);
+    const layout: Placement[] = [
+      { locationId: "room", x: 0, y: 0, w: 6, h: 5 },
+      { locationId: "drawer", x: 1, y: 0, w: 2, h: 1, kind: "drawer" },
+    ];
+    const backup = buildBackup(locations, items, layout);
     expect(parseBackup(json(backup))).toEqual({
       locations,
       items,
+      layout,
       total: { locations: 4, items: 2 },
     });
+  });
+
+  it("버전 1(배치 없음) 파일도 읽는다", () => {
+    const v1 = { ...buildBackup(locations, items), version: 1 } as Partial<
+      ReturnType<typeof buildBackup>
+    >;
+    delete v1.layout;
+    const parsed = parseBackup(json(v1));
+    expect(parsed.items).toEqual(items);
+    expect(parsed.layout).toEqual([]);
+  });
+
+  it("틀린 배치는 조용히 빼고, 종류가 틀린 가구는 기타로", () => {
+    const room = { locationId: "room", x: 0, y: 0, w: 6, h: 5 };
+    const parsed = parseBackup(
+      json(
+        buildBackup(
+          [
+            ...locations,
+            { id: "slot", name: "칸", parentId: "drawer", depth: 2, order: 0 },
+          ],
+          [],
+          [
+            { ...room, locationId: "drawer", x: 0, kind: "sofa" }, // 방보다 먼저 와도 됨
+            room,
+            { ...room, locationId: "kitchen", x: 20 }, // 집 밖으로 나감
+            { ...room, locationId: "bathroom", w: 0 }, // 크기 0
+            { ...room, locationId: "gone" }, // 없는 위치
+            { ...room, locationId: "slot", w: 1, h: 1 }, // 칸은 배치 없음
+            { ...room, x: 6 }, // 중복
+          ] as Placement[],
+        ),
+      ),
+    );
+    expect(parsed.layout).toEqual([
+      room,
+      { ...room, locationId: "drawer", kind: "etc" },
+    ]);
   });
 
   it("파일 이름은 wherehouse-로컬날짜.json", () => {

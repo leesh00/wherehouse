@@ -13,6 +13,7 @@ export default function Settings() {
   const loaded = useLoadInventory();
   const locations = useInventory((s) => s.locations);
   const items = useInventory((s) => s.items);
+  const layout = useInventory((s) => s.layout);
   const importData = useInventory((s) => s.importData);
   const theme = useInventory((s) => s.theme);
   const setTheme = useInventory((s) => s.setTheme);
@@ -31,7 +32,7 @@ export default function Settings() {
 
   function handleExport() {
     const blob = new Blob(
-      [JSON.stringify(buildBackup(locations, items), null, 2)],
+      [JSON.stringify(buildBackup(locations, items, layout), null, 2)],
       { type: "application/json" },
     );
     const url = URL.createObjectURL(blob);
@@ -82,7 +83,7 @@ export default function Settings() {
     )
       return setMessage("가져오기를 취소했습니다.");
     try {
-      await importData(parsed.locations, parsed.items);
+      await importData(parsed.locations, parsed.items, parsed.layout);
       setMessage(
         `재고 ${parsed.items.length}개, 위치 ${parsed.locations.length}개를 가져왔습니다.`,
       );

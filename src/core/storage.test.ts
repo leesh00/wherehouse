@@ -2,7 +2,7 @@ import "fake-indexeddb/auto";
 import { openDB } from "idb";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createIdbAdapter } from "./storage";
-import type { Item, ItemInput } from "./types";
+import type { Item, ItemInput, Placement } from "./types";
 
 const input: ItemInput = {
   name: "휴지",
@@ -185,5 +185,67 @@ describe("IndexedDB 저장소 어댑터", () => {
     await expect(
       freshAdapter().updateItem("none", { quantity: 1 }),
     ).rejects.toThrow();
+  });
+
+  describe("배치(layout)", () => {
+    const placement: Placement = { locationId: "room", x: 0, y: 0, w: 6, h: 5 };
+
+    it("처음엔 비어 있고, setLayout은 전체를 바꾸며 새로 열어도 유지된다", async () => {
+      const name = `test-${n++}`;
+      const db = createIdbAdapter(name);
+      expect(await db.getLayout()).toEqual([]);
+
+      await db.setLayout([placement, { ...placement, locationId: "kitchen" }]);
+      await db.setLayout([placement]);
+
+      expect(await createIdbAdapter(name).getLayout()).toEqual([placement]);
+    });
+
+    it("setLayout 중 하나라도 실패하면 기존 배치가 그대로 남는다", async () => {
+      const name = `test-${n++}`;
+      const db = createIdbAdapter(name);
+      await db.setLayout([placement]);
+
+      await expect(
+        db.setLayout([{ x: 0 } as unknown as Placement]),
+      ).rejects.toThrow();
+
+      expect(await createIdbAdapter(name).getLayout()).toEqual([placement]);
+    });
+
+    it("replaceAll은 배치도 함께 바꾼다", async () => {
+      const name = `test-${n++}`;
+      const db = createIdbAdapter(name);
+      await db.setLayout([placement]);
+      const kitchen = { ...placement, locationId: "kitchen" };
+
+      await db.replaceAll([], [], [kitchen]);
+      expect(await db.getLayout()).toEqual([kitchen]);
+      await db.replaceAll([], []);
+      expect(await db.getLayout()).toEqual([]);
+    });
+
+    it("버전 2 DB를 열면 기존 데이터·설정을 두고 배치 저장소만 추가한다", async () => {
+      const name = `test-${n++}`;
+      const v2 = await openDB(name, 2, {
+        upgrade(db) {
+          db.createObjectStore("locations", { keyPath: "id" });
+          db.createObjectStore("items", { keyPath: "id" }).put({
+            ...input,
+            id: "old",
+            createdAt: "2026-11-01T00:00:00.000Z",
+            updatedAt: "2026-11-01T00:00:00.000Z",
+          });
+          db.createObjectStore("settings").put("dark", "theme");
+        },
+      });
+      v2.close();
+
+      const db = createIdbAdapter(name);
+      expect((await db.getItems()).map((i) => i.id)).toEqual(["old"]);
+      expect(await db.getTheme()).toBe("dark");
+      await db.setLayout([placement]);
+      expect(await db.getLayout()).toEqual([placement]);
+    });
   });
 });

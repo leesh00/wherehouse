@@ -1,7 +1,9 @@
+import { FURNITURE, fitsIn, HOUSE } from "./layout";
 import { MAX_DEPTH } from "./location";
-import type { Item, Location } from "./types";
+import type { FurnitureKind, Item, Location, Placement } from "./types";
 
-export const BACKUP_VERSION = 1;
+/** 2: 배치(layout) 추가. 1도 읽는다(배치는 자동 배치로 채움) */
+export const BACKUP_VERSION = 2;
 
 export interface Backup {
   app: "wherehouse";
@@ -9,11 +11,13 @@ export interface Backup {
   exportedAt: string;
   locations: Location[];
   items: Item[];
+  layout: Placement[];
 }
 
 export function buildBackup(
   locations: Location[],
   items: Item[],
+  layout: Placement[] = [],
   now = new Date(),
 ): Backup {
   return {
@@ -22,6 +26,7 @@ export function buildBackup(
     exportedAt: now.toISOString(),
     locations,
     items,
+    layout,
   };
 }
 
@@ -32,6 +37,7 @@ export const backupFileName = (now = new Date()) =>
 export interface ParsedBackup {
   locations: Location[];
   items: Item[];
+  layout: Placement[];
   total: { locations: number; items: number }; // 파일에 있던 개수
 }
 
@@ -46,6 +52,8 @@ const isDate = (v: unknown) => isStr(v) && !Number.isNaN(Date.parse(v));
  * - 위치: 부모가 올바른 위치여야 하고 depth = 부모 depth + 1 (최상위는 0)
  * - 재고: 필수 필드가 맞고, 올바른 위치를 가리켜야 한다
  * - 같은 id가 여러 번 나오면 처음 것만
+ * - 배치: 올바른 방·가구를 가리키고 좌표·크기가 정수여야 한다. 틀린 배치는 조용히 빼고
+ *   (개수 확인창에 세지 않음) 불러온 뒤 자동 배치로 채운다
  * 파일 자체를 읽을 수 없으면(JSON 아님, 형식 다름) 에러
  */
 export function parseBackup(text: string): ParsedBackup {
@@ -63,7 +71,7 @@ export function parseBackup(text: string): ParsedBackup {
   ) {
     throw new Error("WhereHouse 백업 파일 형식이 아닙니다.");
   }
-  if (data.version !== BACKUP_VERSION) {
+  if (data.version !== 1 && data.version !== BACKUP_VERSION) {
     throw new Error(`지원하지 않는 백업 버전입니다: ${String(data.version)}`);
   }
 
@@ -136,9 +144,46 @@ export function parseBackup(text: string): ParsedBackup {
     });
   }
 
+  // 방 → 가구 순서로: 가구는 이미 통과한 자기 방 안에 들어가야 한다
+  const layout: Placement[] = [];
+  const raw = Array.isArray(data.layout) ? data.layout.filter(isRec) : [];
+  const isInt = (v: unknown, min: number): v is number =>
+    Number.isInteger(v) && (v as number) >= min;
+  for (const depth of [0, 1]) {
+    for (const p of raw) {
+      const loc = isStr(p.locationId) ? valid.get(p.locationId) : undefined;
+      if (
+        loc?.depth !== depth ||
+        layout.some((q) => q.locationId === loc.id) ||
+        !isInt(p.x, 0) ||
+        !isInt(p.y, 0) ||
+        !isInt(p.w, 1) ||
+        !isInt(p.h, 1)
+      )
+        continue;
+      const rect = { x: p.x, y: p.y, w: p.w, h: p.h };
+      const area =
+        depth === 0 ? HOUSE : layout.find((q) => q.locationId === loc.parentId);
+      if (!area || !fitsIn(rect, area)) continue;
+      layout.push(
+        depth === 0
+          ? { locationId: loc.id, ...rect }
+          : {
+              locationId: loc.id,
+              ...rect,
+              kind:
+                isStr(p.kind) && p.kind in FURNITURE
+                  ? (p.kind as FurnitureKind)
+                  : "etc",
+            },
+      );
+    }
+  }
+
   return {
     locations: [...valid.values()],
     items,
+    layout,
     total: { locations: data.locations.length, items: data.items.length },
   };
 }
